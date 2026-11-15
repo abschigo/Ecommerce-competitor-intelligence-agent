@@ -1,0 +1,545 @@
+{
+  "name": "Ecommerce Competitor Intelligence Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "html",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "pageContent",
+              "cssSelector": "body"
+            }
+          ]
+        },
+        "options": {
+          "cleanUpText": true
+        }
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -1472,
+        -512
+      ],
+      "id": "102fb293-144c-487c-8f9f-b48f5e531881",
+      "name": "Extract Website Content"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1968,
+        -656
+      ],
+      "id": "841e7341-76f9-4680-b49e-47e3f2664869",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -2816,
+        -528
+      ],
+      "id": "b84106c4-5c77-45e2-840f-3689e9a70abd",
+      "name": "Schedule Competitor Scan"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IYTz_JdgZUIfz3GIj4jslB98e09r4JTgxjX_fglLBd4",
+          "mode": "list",
+          "cachedResultName": "Monitoring History",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IYTz_JdgZUIfz3GIj4jslB98e09r4JTgxjX_fglLBd4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IYTz_JdgZUIfz3GIj4jslB98e09r4JTgxjX_fglLBd4/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2576,
+        -528
+      ],
+      "id": "cb932cdd-47bb-44c9-8876-367ed5334c4b",
+      "name": "Read History",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JhuWK8pPlxtMaD6j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1xQXQwjAPwYRc3_cpa4ObHJnpzpTR4oU4CgEnRZc4Xg4",
+          "mode": "list",
+          "cachedResultName": "Competitor Intelligence Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xQXQwjAPwYRc3_cpa4ObHJnpzpTR4oU4CgEnRZc4Xg4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xQXQwjAPwYRc3_cpa4ObHJnpzpTR4oU4CgEnRZc4Xg4/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2288,
+        -528
+      ],
+      "id": "3e6e7216-5dfa-4051-b1f9-d176ee895533",
+      "name": "Get Competitors",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JhuWK8pPlxtMaD6j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2016,
+        -528
+      ],
+      "id": "2d2404d5-7acd-4208-9d68-81ff7143c8ab",
+      "name": "Process Competitors"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.website }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "html"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1744,
+        -512
+      ],
+      "id": "63a47a46-1740-4078-865c-83bbbaa25ff7",
+      "name": "Fetch Competitor Website"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst output = [];\n\nfor (const item of items) {\n\n  const data = item.json;\n\n  const content = data.pageContent || \"\";\n  const competitor = data.competitor || \"Konga\";\n  const website = data.website || \"https://www.konga.com\";\n\n  // Extract products\n  const products = [];\n\n  const productRegex = /([^[]+)\\[\\/product\\/([^\\]]+)\\]/g;\n\n  let match;\n\n  while ((match = productRegex.exec(content)) !== null) {\n\n    const name = match[1].trim();\n    const slug = match[2];\n\n    const position = match.index;\n    const context = content.substring(\n      Math.max(0, position - 400),\n      position\n    );\n\n    const prices = context.match(/₦[\\d,]+/g) || [];\n\n    products.push({\n      id: slug,\n      name: name,\n      url: `${website}/product/${slug}`,\n      price: prices.length\n        ? Number(prices[prices.length - 1].replace(/[₦,]/g, \"\"))\n        : null\n    });\n  }\n\n  // Extract promotions\n  const promotions = [\n    ...new Set(\n      content.match(\n        /\\d+%\\s*Off|Flash Sales Reloaded|Buy More\\. Save More|Limited Stock|Crazy Value Zone|Konga Yakata/gi\n      ) || []\n    )\n  ];\n\n  // Retrieve previous history\n  const previousData = data.previous_data || {};\n\n  const oldProducts = previousData.products || [];\n  const oldPromotions = previousData.promotions || [];\n\n  // Compare products\n  const oldMap = new Map(\n    oldProducts.map(p => [p.id, p])\n  );\n\n  const newProducts = [];\n  const priceIncreases = [];\n  const priceDecreases = [];\n\n  for (const product of products) {\n\n    const old = oldMap.get(product.id);\n\n    if (!old) {\n      newProducts.push(product);\n      continue;\n    }\n\n    if (\n      old.price !== null &&\n      product.price !== null &&\n      old.price !== product.price\n    ) {\n\n      if (product.price > old.price) {\n        priceIncreases.push({\n          product: product.name,\n          old_price: old.price,\n          new_price: product.price\n        });\n      } else {\n        priceDecreases.push({\n          product: product.name,\n          old_price: old.price,\n          new_price: product.price\n        });\n      }\n    }\n  }\n\n  // Find removed products\n  const currentIds = new Set(products.map(p => p.id));\n\n  const removedProducts = oldProducts.filter(\n    p => !currentIds.has(p.id)\n  );\n\n  // Compare promotions\n  const newPromotions = promotions.filter(\n    p => !oldPromotions.includes(p)\n  );\n\n  const removedPromotions = oldPromotions.filter(\n    p => !promotions.includes(p)\n  );\n\n  // Detect changes\n  const changesDetected =\n    newProducts.length > 0 ||\n    removedProducts.length > 0 ||\n    priceIncreases.length > 0 ||\n    priceDecreases.length > 0 ||\n    newPromotions.length > 0 ||\n    removedPromotions.length > 0;\n\n  output.push({\n    json: {\n      competitor,\n      website,\n      checked_at: new Date().toISOString(),\n\n      changes_detected: changesDetected,\n      competitor_id: data.competitor_id || \"1\",\n\n      change_summary: {\n        new_products: newProducts,\n        removed_products: removedProducts,\n        price_increases: priceIncreases,\n        price_decreases: priceDecreases,\n        new_promotions: newPromotions,\n        removed_promotions: removedPromotions\n      },\n\n      current_data: {\n        products,\n        promotions\n      },\n\n      previous_data: previousData,\n\n      total_products: products.length\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2672,
+        -880
+      ],
+      "id": "ce82ab1d-1abf-4aa3-9fd3-6fe108e66d17",
+      "name": "Compare Competitor Changes"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IYTz_JdgZUIfz3GIj4jslB98e09r4JTgxjX_fglLBd4",
+          "mode": "list",
+          "cachedResultName": "Monitoring History",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IYTz_JdgZUIfz3GIj4jslB98e09r4JTgxjX_fglLBd4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IYTz_JdgZUIfz3GIj4jslB98e09r4JTgxjX_fglLBd4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "competitor_id": "={{ $json.competitor_id }}",
+            "competitor_name": "={{ $json.competitor }}",
+            "website": "={{ $json.website }}",
+            "products": "={{ JSON.stringify($json.current_data.products) }}",
+            "promotions": "={{ JSON.stringify($json.current_data.promotions) }}",
+            "last_checked": "={{ $json.checked_at }}"
+          },
+          "matchingColumns": [
+            "competitor_id"
+          ],
+          "schema": [
+            {
+              "id": "competitor_id",
+              "displayName": "competitor_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "competitor_name",
+              "displayName": "competitor_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "products",
+              "displayName": "products",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "promotions",
+              "displayName": "promotions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_checked",
+              "displayName": "last_checked",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2432,
+        -880
+      ],
+      "id": "ce472721-56e1-4eff-88d6-306aed474ff5",
+      "name": "Save Competitor History",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JhuWK8pPlxtMaD6j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "f9dbde7c-d0be-4b7f-ab3c-db5104aeeecf",
+              "leftValue": "={{ $('Compare Competitor Changes').item.json.changes_detected }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        -2192,
+        -880
+      ],
+      "id": "73da4fa3-d573-4cd6-a3f5-3ea4ce321e1a",
+      "name": "Changes Detected?"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "options": {
+          "systemMessage": "You are a professional Competitor Intelligence Analyst working for a business intelligence company.\n\nYour responsibility is to analyse competitor website data, detect meaningful market changes, identify business opportunities, and provide actionable recommendations.\n\nYou will receive structured competitor data containing:\n\n* Competitor name\n* Website\n* New products\n* Removed products\n* Price increases\n* Price decreases\n* New promotions\n* Removed promotions\n* Previous competitor data\n* Current competitor data\n\nYOUR RESPONSIBILITIES:\n\n1. COMPETITOR ANALYSIS\n   Identify what the competitor is doing and explain significant changes.\n\n2. PRICING INTELLIGENCE\n   Analyse price increases and decreases. Explain how these changes could affect market positioning.\n\n3. PRODUCT INTELLIGENCE\n   Identify newly introduced products and removed products. Highlight potential product opportunities.\n\n4. PROMOTIONAL INTELLIGENCE\n   Analyse new discounts, campaigns and promotional strategies.\n\n5. MARKET OPPORTUNITIES\n   Identify opportunities that the business could exploit to attract customers.\n\n6. STRATEGIC RECOMMENDATIONS\n   Provide practical recommendations for competing more effectively.\n\n7. BUSINESS IMPACT\n   Classify each important finding as:\n\n* HIGH\n* MEDIUM\n* LOW\n\nIMPORTANT RULES:\n\n* Only analyse information provided in the input.\n* Never invent competitor prices, products or promotions.\n* Clearly distinguish verified changes from assumptions.\n* If information is missing, state that it is unavailable.\n* Avoid generic recommendations.\n* Focus on actionable business intelligence.\n\nOUTPUT FORMAT:\n\nCOMPETITOR INTELLIGENCE REPORT\n\nCompetitor:\nWebsite:\nAnalysis Date:\n\n1. EXECUTIVE SUMMARY\n\n2. NEW PRODUCTS DISCOVERED\n\n3. PRICE CHANGES\n\n4. PROMOTIONAL ACTIVITIES\n\n5. REMOVED PRODUCTS OR PROMOTIONS\n\n6. COMPETITOR STRATEGY OBSERVATIONS\n\n7. BUSINESS OPPORTUNITIES\n\n8. RECOMMENDED ACTIONS\n\n9. INTELLIGENCE PRIORITY\n   HIGH / MEDIUM / LOW\n\n10. FINAL ANALYST INSIGHT\n\n{{ JSON.stringify({\n  analysis_date: $now.toISO(),\n  competitor_data: $json\n}) }}\n\nIMPORTANT:\nNever describe a product as newly launched or newly introduced\nunless historical comparison confirms it was absent previously.\n\nIf this is the first scan, classify products as:\n\"Products discovered during initial scan.\"\n\nDo not claim historical changes without historical evidence.\n\nFor every price change, calculate:\n\nPrice Difference = Old Price - New Price\n\nPercentage Change =\n((New Price - Old Price) / Old Price) * 100\n\nShow:\nProduct Name\nPrevious Price\nCurrent Price\nAmount Changed\nPercentage Changed\n\nClearly distinguish discounts displayed on the website\nfrom price changes detected between historical scans.\n\nMake recommendations specific to the competitor data.\n\nFor every opportunity, explain:\n1. What the competitor did.\n2. Why it matters.\n3. What action the business should take.\n4. Expected business benefit.\n5. Priority level.\n\nNever recommend copying a competitor blindly.\nConsider profitability, customer demand and business resources.\n\nWrite professionally and clearly. Make the report useful to a business owner or management team.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1872,
+        -896
+      ],
+      "id": "420b5903-d3bc-44be-8d72-ff7950afe340",
+      "name": "Generate Intelligence Report"
+    },
+    {
+      "parameters": {
+        "sendTo": "abellucky115@gmail.com",
+        "subject": "={{ 'Competitor Intelligence Report | ' + $json.competitor + ' | ' + $now.toFormat('dd MMM yyyy') }}",
+        "emailType": "text",
+        "message": "={{ $json.output.split('```json')[0].trim().replace(/\\n(## \\d+\\.)/g, '\\n\\n$1').replace(/\\n/g, '\\r\\n') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1520,
+        -896
+      ],
+      "id": "2ed938e4-da2a-4105-9d0d-b4c33f551090",
+      "name": "Email Intelligence Report",
+      "webhookId": "d872185c-cf99-4dd8-8b86-5ac8310420da",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UgHt3J370u6mzpon",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract Website Content": {
+      "main": [
+        [
+          {
+            "node": "Compare Competitor Changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Intelligence Report",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Competitor Scan": {
+      "main": [
+        [
+          {
+            "node": "Read History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read History": {
+      "main": [
+        [
+          {
+            "node": "Get Competitors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Competitors": {
+      "main": [
+        [
+          {
+            "node": "Process Competitors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Competitors": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fetch Competitor Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Competitor Website": {
+      "main": [
+        [
+          {
+            "node": "Extract Website Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare Competitor Changes": {
+      "main": [
+        [
+          {
+            "node": "Save Competitor History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Competitor History": {
+      "main": [
+        [
+          {
+            "node": "Changes Detected?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changes Detected?": {
+      "main": [
+        [
+          {
+            "node": "Generate Intelligence Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Intelligence Report": {
+      "main": [
+        [
+          {
+            "node": "Email Intelligence Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Intelligence Report": {
+      "main": [
+        [
+          {
+            "node": "Process Competitors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "7bdc2e70-5efc-4ad7-bb1a-45ade4f207b0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4aaa156026f2f3b6276b47b0aa0ea3e329d95db1ca7817947ca7c232df429434"
+  },
+  "nodeGroups": [],
+  "id": "fWaXV7iCFmF1gYV1",
+  "tags": []
+}
